@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/0_Tests/CreateTiles/0_Scene/CreateTiles.unity
+  isLoaded: 1
+  isActive: 1
