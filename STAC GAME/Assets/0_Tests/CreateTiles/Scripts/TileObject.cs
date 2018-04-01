@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TileWay { Right, UpRight, DownRight, Left, UpLeft, DownLeft };
+
 public class TileObject : MonoBehaviour
 {
-    public enum Way { Right, UpRight, DownRight, Left, UpLeft, DownLeft };
-
     [SerializeField]
     private Vector2Int tilePosition;
     [SerializeField]
@@ -30,16 +30,18 @@ public class TileObject : MonoBehaviour
             (tilePosition + Vector2Int.one),
             (tilePosition + Vector2Int.down),
             (tilePosition + Vector2Int.left),
-            (tilePosition - Vector2Int.one),
             (tilePosition + Vector2Int.up),
+            (tilePosition - Vector2Int.one),
         };
 
-        for (int i = 0; i < aroundTiles.Length; i++)
+        for (int i = 0; i < AroundTiles.Length; i++)
         {
             if (Vector2Int.Distance(startpos, pos[i]) >= (TileManager.Instance.num - num - 1))
             {
                 TileObject tile = TileManager.Instance.CreateTile(pos[i]);
-                tile.CreateAroundTile(startpos, (num - 1));
+
+
+                aroundTiles[i].CreateAroundTile(startpos, (num - 1));
             }
         }
     }
@@ -66,8 +68,8 @@ public class TileObject : MonoBehaviour
             (tilePosition + Vector2Int.one),
             (tilePosition + Vector2Int.down),
             (tilePosition + Vector2Int.left),
-            (tilePosition - Vector2Int.one),
             (tilePosition + Vector2Int.up),
+            (tilePosition - Vector2Int.one),
         };
 
         aroundTiles[index] = TileManager.Instance.FindTile(pos[index]);

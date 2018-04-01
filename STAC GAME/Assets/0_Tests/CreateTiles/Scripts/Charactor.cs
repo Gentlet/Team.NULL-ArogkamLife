@@ -11,7 +11,7 @@ public class Charactor : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        CurrentTile = TileManager.Instance.FindTile(transform.position);
+        CurrentTile = TileManager.Instance.FindTile(Vector2Int.zero);
 
         CreateMap(Vector2Int.zero);
     }
@@ -25,7 +25,7 @@ public class Charactor : MonoBehaviour
 
         Vector2 tmp = Vector2.zero;
 
-        if (Input.GetKey(KeyCode.RightArrow)|| Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             tmp.x += 1;
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             tmp.x -= 1;
@@ -44,20 +44,15 @@ public class Charactor : MonoBehaviour
 
     void posset()
     {
-        if (Vector2.Distance(transform.position, CurrentTile.transform.position) < 0.5f)
+        if (Vector2.Distance(transform.position, CurrentTile.transform.position) < 0.5840952f)
             return;
 
-        TileObject tmp = TileManager.Instance.FindTile(CurrentTile, transform.position);
+        TileObject tile = TileManager.Instance.FindTile(CurrentTile, transform.position);
 
-        if (tmp != null)
+        if (tile != null)
         {
-            TileObject tile = tmp;
-
-            if (CurrentTile != tile)
-            {
-                CurrentTile = tile;
-                CreateMap(tile.TilePosition);
-            }
+            CurrentTile = tile;
+            CreateMap(tile.TilePosition);
         }
     }
 

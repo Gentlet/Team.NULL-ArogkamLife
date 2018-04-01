@@ -10,9 +10,7 @@ public class TileManager : SingletonGameObject<TileManager>
     [SerializeField]
     private TileObject TilePrefab;
 
-    private Vector2Int TileMapSize;
-
-    private List<TileObject> TilesList;
+    private List<List<TileObject>>[] TileLists;
 
     public int num;
 
@@ -25,11 +23,19 @@ public class TileManager : SingletonGameObject<TileManager>
 
     protected override void Init()
     {
-        TilesList = new List<TileObject>();
+        TileLists = new List<List<TileObject>>[4];
 
-        TilesList.Add(Instantiate(TilePrefab, TileMapObject.transform));
-        TilesList[0].TilePosition = Vector2Int.zero;
-        TilesList[0].transform.position = Vector3.zero;
+        for (int i = 0; i < TileLists.Length; i++)
+        {
+            TileLists[i] = new List<List<TileObject>>();
+
+            for (int j = 0; j < TileLists[i].Count; j++)
+            {
+                TileLists[i][j] = new List<TileObject>();
+            }
+        }
+
+        CreateTile(Vector2Int.zero);
     }
 
     private void Update()
@@ -53,8 +59,6 @@ public class TileManager : SingletonGameObject<TileManager>
 
                     if (tile == null)
                     {
-                        Debug.Log("Mpos" + tmp + " (" + (TilesList.Count - 1) + ") ");
-
                         CreateTile(pos);
                         break;
                     }
@@ -67,63 +71,181 @@ public class TileManager : SingletonGameObject<TileManager>
     {
         TryCreateTileNum += 1;
 
-        if (FindTile(position) != null)
-            return FindTile(position);
+        List<List<TileObject>> tilelist = GetTileList(position);
+        Vector2Int index = new Vector2Int(Mathf.Abs(position.x), Mathf.Abs(position.y));
 
-        TilesList.Add(Instantiate(TilePrefab, TileMapObject.transform));
-        TilesList[TilesList.Count - 1].TilePosition = position;
-        TilesList[TilesList.Count - 1].transform.position = new Vector2(1f * position.x - (0.5f * position.y), 0.87f * position.y);
 
-        TilesList[TilesList.Count - 1].ConnectAroundTiles(2);
-
-        return TilesList[TilesList.Count - 1];
-    }
-
-    //public void Refresh()
-    //{
-    //    for (int i = 0; i < TilesList.Count; i++)
-    //    {
-    //        if (!TilesList[i].AroundTilesIsFull)
-    //            TilesList[i].ConnectAroundTiles();
-    //    }
-    //}
-
-    public TileObject FindTile(Vector2Int position)
-    {
-        for (int i = 0; i < TilesList.Count; i++)
+        if (tilelist.Count - 1 < index.x || tilelist[index.x].Count - 1 < index.y)
         {
-            if (TilesList[i].TilePosition == position)
-                return TilesList[i];
-        }
-
-        return null;
-    }
-
-    public TileObject FindTile(Vector2 position)
-    {
-        for (int i = 0; i < TilesList.Count; i++)
-        {
-            if (Vector2.Distance(TilesList[i].transform.position, position) < 0.5f)
+            while (tilelist.Count - 1 < index.x)
             {
-                Debug.DrawLine(position, TilesList[i].transform.position, Color.green);
+                tilelist.Add(new List<TileObject>());
+            }
 
-                return TilesList[i];
+            while (tilelist[index.x].Count - 1 < index.y)
+            {
+                tilelist[index.x].Add(null);
             }
         }
 
-        return null;
+        if (tilelist[index.x][index.y] != null)
+            return tilelist[index.x][index.y];
+
+        tilelist[index.x][index.y] = Instantiate(TilePrefab, TileMapObject.transform);
+        tilelist[index.x][index.y].TilePosition = position;
+        tilelist[index.x][index.y].transform.position = new Vector2(1f * position.x - (0.5f * position.y), 0.87f * position.y);
+
+        tilelist[index.x][index.y].ConnectAroundTiles(2);
+
+        if (index.x == 0 && index.y == 0)
+        {
+            for (int i = 0; i < TileLists.Length; i++)
+            {
+                while (TileLists[i].Count - 1 < index.x)
+                {
+                    TileLists[i].Add(new List<TileObject>());
+                }
+
+                while (TileLists[i][index.x].Count - 1 < index.y)
+                {
+                    TileLists[i][index.x].Add(null);
+                }
+
+
+                TileLists[i][index.x][index.y] = tilelist[index.x][index.y];
+            }
+        }
+
+        if (index.x == 0 || index.y == 0)
+        {
+            if (index.x == 0 && 0 < index.y)
+            {
+                for (int i = 0; i == 2; i = 1)
+                {
+                    while (TileLists[i].Count - 1 < index.x)
+                    {
+                        TileLists[i].Add(new List<TileObject>());
+                    }
+
+                    while (TileLists[i][index.x].Count - 1 < index.y)
+                    {
+                        TileLists[i][index.x].Add(null);
+                    }
+
+
+                    TileLists[i][index.x][index.y] = tilelist[index.x][index.y];
+
+                    i++;
+                }
+            }
+            if (index.x == 0 && index.y < 0)
+            {
+                for (int i = 2; i == 4; i = 3)
+                {
+                    while (TileLists[i].Count - 1 < index.x)
+                    {
+                        TileLists[i].Add(new List<TileObject>());
+                    }
+
+                    while (TileLists[i][index.x].Count - 1 < index.y)
+                    {
+                        TileLists[i][index.x].Add(null);
+                    }
+
+
+                    TileLists[i][index.x][index.y] = tilelist[index.x][index.y];
+
+                    i++;
+                }
+            }
+            if (index.y == 0 && 0 < index.x)
+            {
+                for (int i = 0; i == 4; i = 3)
+                {
+                    while (TileLists[i].Count - 1 < index.x)
+                    {
+                        TileLists[i].Add(new List<TileObject>());
+                    }
+
+                    while (TileLists[i][index.x].Count - 1 < index.y)
+                    {
+                        TileLists[i][index.x].Add(null);
+                    }
+
+
+                    TileLists[i][index.x][index.y] = tilelist[index.x][index.y];
+
+                    i++;
+                }
+            }
+            if (index.y == 0 && index.x < 0)
+            {
+                for (int i = 1; i == 3; i = 2)
+                {
+                    while (TileLists[i].Count - 1 < index.x)
+                    {
+                        TileLists[i].Add(new List<TileObject>());
+                    }
+
+                    while (TileLists[i][index.x].Count - 1 < index.y)
+                    {
+                        TileLists[i][index.x].Add(null);
+                    }
+
+
+                    TileLists[i][index.x][index.y] = tilelist[index.x][index.y];
+
+                    i++;
+                }
+            }
+        }
+
+        return tilelist[index.x][index.y];
+    }
+
+    private List<List<TileObject>> GetTileList(Vector2Int position)
+    {
+        if (0 <= position.x && 0 <= position.y)
+            return TileLists[0];
+        if (position.x <= 0 && 0 <= position.y)
+            return TileLists[1];
+        if (position.x <= 0 && position.y <= 0)
+            return TileLists[2];
+        if (0 <= position.x && position.y <= 0)
+            return TileLists[3];
+
+        return TileLists[0];
+    }
+
+    public TileObject FindTile(Vector2Int position)
+    {
+        List<List<TileObject>> tilelist = GetTileList(position);
+        Vector2Int index = new Vector2Int(Mathf.Abs(position.x), Mathf.Abs(position.y));
+
+        if (tilelist.Count - 1 < index.x || tilelist[index.x].Count - 1 < index.y)
+            return null;
+
+        return tilelist[index.x][index.y];
     }
 
     public TileObject FindTile(TileObject currentTile, Vector2 position)
     {
-        for (int i = 0; i < currentTile.AroundTiles.Length; i++)
+        Vector2 direction = position - (Vector2)currentTile.transform.position;
+        int nearTile;
+
+        if (0.2f <= direction.y)
         {
-            if (currentTile.AroundTiles[i] != null && Vector2.Distance(currentTile.AroundTiles[i].transform.position, position) < 0.5f)
-            {
-                return currentTile.AroundTiles[i];
-            }
+            nearTile = (int)(0 < direction.x ? TileWay.UpRight : TileWay.UpLeft);
+        }
+        else if (direction.y <= -0.2f)
+        {
+            nearTile = (int)(0 < direction.x ? TileWay.DownRight : TileWay.DownLeft);
+        }
+        else
+        {
+            nearTile = (int)(0 < direction.x ? TileWay.Right : TileWay.Left);
         }
 
-        return null;
+        return currentTile.AroundTiles[nearTile];
     }
 }
